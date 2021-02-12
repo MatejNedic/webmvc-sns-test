@@ -2,6 +2,7 @@ package com.example.demo;
 
 import com.amazonaws.services.sns.AmazonSNS;
 import com.amazonaws.services.sqs.AmazonSQSAsync;
+import io.awspring.cloud.messaging.core.NotificationMessagingTemplate;
 import io.awspring.cloud.messaging.core.QueueMessagingTemplate;
 import io.awspring.cloud.messaging.listener.annotation.SqsListener;
 import org.slf4j.Logger;
@@ -17,10 +18,12 @@ import org.springframework.messaging.support.MessageBuilder;
 public class DemoApplication {
 
     private final QueueMessagingTemplate queueMessagingTemplate;
+    private final NotificationMessagingTemplate notificationMessagingTemplate;
 
     @Autowired
-    public DemoApplication(AmazonSQSAsync amazonSqs, AmazonSNS amazonSNSAsync) {
+    public DemoApplication(AmazonSQSAsync amazonSqs, AmazonSNS amazonSNSAsync, AmazonSNS amazonSNS) {
         this.queueMessagingTemplate = new QueueMessagingTemplate(amazonSqs);
+        this.notificationMessagingTemplate = new NotificationMessagingTemplate(amazonSNS);
     }
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DemoApplication.class);
@@ -33,6 +36,8 @@ public class DemoApplication {
     public void sendMessage() {
         this.queueMessagingTemplate.send("InfrastructureStack-spring-aws",
                 MessageBuilder.withPayload("Spring cloud Aws SQS sample!").build());
+        this.notificationMessagingTemplate.send("snsSpring",
+                MessageBuilder.withPayload("Spring cloud Aws SNS sample!").build());
     }
 
     @SqsListener("InfrastructureStack-spring-aws")
